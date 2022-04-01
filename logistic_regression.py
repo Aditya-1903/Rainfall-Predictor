@@ -42,6 +42,7 @@ train_targets = train_df[target_col]
 test_inputs = test_df[input_cols]
 test_targets =test_df[target_col]
 
+
 #Partitioning the dataset columns into numerical and categorical columns.
 
 numeric_cols = select_if(train_inputs,is.numeric)
@@ -62,6 +63,7 @@ for(i in 1:ncol(train_inputs))
     test_inputs[ , i][is.na(test_inputs[ , i])] <- mean(test_inputs[ , i], na.rm = TRUE)
 }
 
+
 #Min-Max Scaling
 
 range01 <- function(x){(x-min(x))/(max(x)-min(x))}
@@ -71,6 +73,7 @@ for(i in numeric_cols)
     train_inputs[,i] = range01(train_inputs[,i])
     test_inputs[,i] = range01(test_inputs[,i])
 }
+
 
 #One Hot Encoder function
 one_hot_encoding = function(df,columns){
@@ -96,6 +99,7 @@ one_hot_encoding = function(df,columns){
   return(df)
 }
 
+
 #Encoding train and test inputs with our one hot encoder function.
 
 train_inputs = one_hot_encoding(train_inputs,c(categorical_cols))
@@ -103,6 +107,7 @@ test_inputs = one_hot_encoding(test_inputs,c(categorical_cols))
 train_inputs$Date = NULL
 test_inputs$Date = NULL
 colnames(train_inputs)
+
 
 #Encoding train and test targets with our one hot encoder function.
 
@@ -122,13 +127,16 @@ test_inputs$RainTomorrow_Yes = test_targets$RainTomorrow_Yes
 train_inputs[is.na(train_inputs)] = 0
 test_inputs[is.na(test_inputs)] = 0
 
+
 #Simple logistic regression model
 logistic <- glm(train_inputs$RainTomorrow_Yes ~ train_inputs$RainToday_Yes,data=train_inputs,family="binomial")
 logistic
 
+
 #Training our final logistic regression model
 logistic <- glm(train_inputs$RainTomorrow_Yes ~ . ,data=train_inputs,family="binomial")
 summary(logistic)
+
 
 #Predicting the train inputs
 
@@ -143,11 +151,13 @@ geom_point(aes(color=train_inputs$RainTomorrow_Yes),alpha=1,shape=4,stroke=2) +
 xlab("Index") +
 ylab("Predicted probability of getting rain")
 
-Fitting our logistic regression model
+
+#Fitting our logistic regression model
 predict_reg <- predict(logistic, test_inputs, type = "response")
 # Changing probabilities
 predict_reg <- ifelse(predict_reg >0.5, 1, 0)
 table(test_inputs$RainTomorrow_Yes, predict_reg)
+
 
 missing_classerr <- mean(predict_reg != test_inputs$RainTomorrow_Yes)
 Model Accuracy
